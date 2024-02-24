@@ -1,7 +1,7 @@
 import json
 import re
 import time
-from datetime import datetime,date
+from datetime import date, datetime
 
 import requests
 from bs4 import BeautifulSoup
@@ -65,7 +65,7 @@ def scrape_articles():
     elapsed_time = end_time - start_time
     time_taken = int(elapsed_time)
     # Save the data to a JSON file
-    output_file = "TechCrunch.json"
+    output_file = f"{target_date}_TechCrunch.json"
     with open(output_file, "w", encoding="utf-8") as json_file:
         json.dump({
             "source": "TechCrunch",

@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import date
 
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -8,6 +9,7 @@ load_dotenv()
 
 def configure_generative_model():
     genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
     generation_config = {
         "temperature": 0.9,
         "top_p": 0.1,
@@ -69,14 +71,15 @@ def summarise():
     model = configure_generative_model()
 
     # Generating Summaries
-    json_path_summaries = "TechCrunch.json"
+    target_date = date.today()
+    json_path_summaries = f"{target_date}_TechCrunch.json"
     json_data_summaries = load_json_data(json_path_summaries)
     update_json_with_summaries(json_data_summaries, model)
     save_json_data(json_data_summaries, json_path_summaries)
     print(f"JSON file '{json_path_summaries}' updated with summaries.")
 
     # Generating Titles
-    json_path_titles = "TechCrunch.json"
+    json_path_titles = f"{target_date}_TechCrunch.json"
     json_data_titles = load_json_data(json_path_titles)
     update_json_with_titles(json_data_titles, model)
     save_json_data(json_data_titles, json_path_titles)

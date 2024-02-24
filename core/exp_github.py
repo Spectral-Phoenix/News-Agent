@@ -1,4 +1,5 @@
 import os
+from datetime import date
 
 from dotenv import load_dotenv
 from github import Github
@@ -6,12 +7,12 @@ from github import Github
 load_dotenv()
 
 def update():
-
+     target_date = date.today()
      access_tocken = os.getenv("GITHUB_ACCESS_TOKEN")
      github_repo = "data"
      git_branch = "main"
-     initial_file = "TechCrunch.json"
-     folder_empl_in_git = "TechCrunch.json"
+     initial_file = f"{target_date}_TechCrunch.json"
+     folder_empl_in_git = f"{target_date}_TechCrunch.json"
 
      g = Github(access_tocken)
      repo = g.get_user().get_repo(github_repo)
