@@ -1,6 +1,6 @@
-from source.scrape import scrape_articles
-from source.generate import summarise
-from source.exp_github import update
+from core.scrape import scrape_articles
+from core.generate import summarise
+from core.exp_github import update
 
 scrape_articles()
 summarise()
