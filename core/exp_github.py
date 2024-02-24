@@ -1,9 +1,12 @@
 from github import Github
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 def update():
 
-     access_tocken = "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"
+     access_tocken = os.getenv("GITHUB_ACCESS_TOKEN")
      github_repo = "data"
      git_branch = "main"
      initial_file = "TechCrunch.json"
