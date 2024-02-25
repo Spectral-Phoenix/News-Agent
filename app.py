@@ -6,11 +6,11 @@ from core.scrape import scrape_articles
 
 app = Flask(__name__)
 
-#@app.route('/')
+@app.route('/')
 def home():
     return "<h2> News Agent - Flask App</h2>"
 
-#@app.route('/process', methods=['GET'])
+@app.route('/process', methods=['GET'])
 def process():
     content = scrape_articles()
     summarised_content = summarise(content)
