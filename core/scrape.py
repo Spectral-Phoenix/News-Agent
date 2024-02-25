@@ -70,8 +70,7 @@ def scrape_articles():
         }
     
     print("Fetching articles...")
-    
-    start_time = time.time()
+
     links = get_links_for_date(target_date)
     articles = []
     
@@ -79,10 +78,6 @@ def scrape_articles():
         article = parse_article(link)
         article["category"] = category
         articles.append(article)
-    
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    time = int(elapsed_time)
 
      # Save the data to Supabase Storage
     data = {
@@ -95,8 +90,6 @@ def scrape_articles():
     json_data = json.dumps(data, ensure_ascii=False, indent=4)
 
     json_buffer = json_data.encode('utf-8')
-
-    time = "Time taken to scrape: " + str(time) + "seconds"
 
     print(f"{len(articles)} articles scraped successfully!")
 
