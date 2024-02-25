@@ -12,7 +12,6 @@ def home():
 
 @app.route('/process', methods=['GET'])
 def process_data():
-    # Call all the functions here
     scrape_articles()
     summarise()
     update()
