@@ -12,8 +12,8 @@ def home():
 
 @app.route('/process', methods=['GET'])
 def process_data():
-    scrape_articles()
-    summarise()
-    update()
+    content = scrape_articles()
+    summarised_content = summarise(content)
+    update(summarised_content)
     
     return jsonify({"message": "Scraping, summarization, and update completed."})

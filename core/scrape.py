@@ -18,7 +18,7 @@ key: str = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
 
 def scrape_articles():
-    target_date = date.today()
+    target_date = "2024-02-24"
     # Config
     BASE_URL = "https://techcrunch.com/category/"
     CATEGORIES = ["artificial-intelligence", "apps", "biotech-health", "climate", "commerce",
@@ -99,11 +99,13 @@ def scrape_articles():
                 print(f"{len(articles)} articles uploaded successfully!")
                 msg = f"Content saved to Supabase Storage: {target_date}_TechCrunch.json"
                 print(msg)
+                return json_buffer
             else:
                with supabase.storage.from_("tech-crunch").update(file= json_buffer, path=f"{target_date}_TechCrunch.json") as response:
                 if response.status_code == 200:
                     print(f"{len(articles)} articles uploaded successfully!")
                     msg = f"Content saved to Supabase Storage: {target_date}_TechCrunch.json"
                     print(msg)
+                    return json_buffer
     except Exception as e:
         print(f"Exception while uploading to Supabase Storage: {e}")
