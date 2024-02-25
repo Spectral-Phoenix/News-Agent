@@ -17,7 +17,7 @@ url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
 
-def scrape_articles(time):
+def scrape_articles():
     target_date = date.today()
     # Config
     BASE_URL = "https://techcrunch.com/category/"
@@ -97,8 +97,8 @@ def scrape_articles(time):
     json_buffer = json_data.encode('utf-8')
 
     time = "Time taken to scrape: " + str(time) + "seconds"
+
     print(f"{len(articles)} articles scraped successfully!")
-    print(time)
 
     try:
         with supabase.storage.from_("tech-crunch").upload(file= json_buffer, path=f"{target_date}_TechCrunch.json") as response:
@@ -114,5 +114,3 @@ def scrape_articles(time):
                     print(msg)
     except Exception as e:
         print(f"Exception while uploading to Supabase Storage: {e}")
-
-scrape_articles(time)
