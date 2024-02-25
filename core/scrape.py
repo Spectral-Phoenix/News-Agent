@@ -1,24 +1,22 @@
-import json
-import re
-import time
-import io
-from datetime import date, datetime
-import os
-
-from supabase import create_client, Client
 import requests
 from bs4 import BeautifulSoup
-
-from dotenv import load_dotenv
-
-load_dotenv()
-
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_KEY")
-supabase: Client = create_client(url, key)
+from datetime import datetime
+import re
+import json
+import time
 
 def scrape_articles():
-    target_date = "2024-02-24"
+    date_input = "2024-02-24"
+
+    if not date_input:
+        print("Please provide a valid date.")
+        return
+    try:
+        target_date = datetime.strptime(date_input, "%Y-%m-%d").date()
+    except ValueError:
+        print("Invalid date format. Please use YYYY-MM-DD.")
+        return
+
     # Config
     BASE_URL = "https://techcrunch.com/category/"
     CATEGORIES = ["artificial-intelligence", "apps", "biotech-health", "climate", "commerce",
@@ -44,20 +42,6 @@ def scrape_articles():
             print(f"Error scraping {category_url}: {e}")
             return []
     
-    def get_links_for_date(target_date):
-        links = {}  # Dictionary to store unique links
-    
-        for category in CATEGORIES:
-            category_url = BASE_URL + category + "/"
-            category_links = scrape_links(category_url, category)
-            for link, category in category_links:
-                date = extract_date(link)
-                if date == target_date and link not in links:
-                    # Check if the link is already in the 'links' dictionary
-                    links[link] = category
-    
-        return links
-    
     def parse_article(link):
         article = requests.get(link)
         soup = BeautifulSoup(article.text, 'lxml')
@@ -68,18 +52,33 @@ def scrape_articles():
             "image_links": image_links,
             "link": link,
         }
-    
-    print("Fetching articles...")
 
-    links = get_links_for_date(target_date)
-    articles = []
+    print("Fetching articles...")
     
+    start_time = time.time()
+    links = {}  # Dictionary to store unique links
+    
+    for category in CATEGORIES:
+        category_url = BASE_URL + category + "/"
+        category_links = scrape_links(category_url, category)
+        for link, category in category_links:
+            date = extract_date(link)
+            if date == target_date and link not in links:
+                # Check if the link is already in the 'links' dictionary
+                links[link] = category
+    
+    articles = []
+
     for link, category in links.items():
         article = parse_article(link)
         article["category"] = category
         articles.append(article)
+    
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    elapsed_time_in_seconds = int(elapsed_time)
 
-     # Save the data to Supabase Storage
+    # Save the data to a JSON file
     data = {
         "source": "TechCrunch",
         "date": str(target_date),
@@ -90,22 +89,9 @@ def scrape_articles():
     json_data = json.dumps(data, ensure_ascii=False, indent=4)
 
     json_buffer = json_data.encode('utf-8')
-
+    
+    time_taken_msg = "Time taken to scrape: " + str(elapsed_time_in_seconds) + " seconds"
     print(f"{len(articles)} articles scraped successfully!")
+    print(time_taken_msg)
 
-    try:
-        with supabase.storage.from_("tech-crunch").upload(file= json_buffer, path=f"{target_date}_TechCrunch.json") as response:
-            if response.status_code == 200:
-                print(f"{len(articles)} articles uploaded successfully!")
-                msg = f"Content saved to Supabase Storage: {target_date}_TechCrunch.json"
-                print(msg)
-                return json_buffer
-            else:
-               with supabase.storage.from_("tech-crunch").update(file= json_buffer, path=f"{target_date}_TechCrunch.json") as response:
-                if response.status_code == 200:
-                    print(f"{len(articles)} articles uploaded successfully!")
-                    msg = f"Content saved to Supabase Storage: {target_date}_TechCrunch.json"
-                    print(msg)
-                    return json_buffer
-    except Exception as e:
-        print(f"Exception while uploading to Supabase Storage: {e}")
+    return json_buffer
