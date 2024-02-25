@@ -1,6 +1,7 @@
 import json
 import re
 import time
+import io
 from datetime import date, datetime
 import os
 
@@ -88,11 +89,11 @@ def scrape_articles():
     }
 
     json_data = json.dumps(data, ensure_ascii=False, indent=4)
-    with open(f"{target_date}_TechCrunch.json", "w") as f:
-        f.write(json_data)
+
+    json_buffer = json_data.encode('utf-8')
 
     try:
-        with supabase.storage.from_("tech-crunch").upload(file=f"{target_date}_TechCrunch.json", path=f"{target_date}_TechCrunch.json") as response:
+        with supabase.storage.from_("tech-crunch").upload(file= json_buffer, path=f"{target_date}_TechCrunch.json") as response:
             if response.status_code == 200:
                 print(f"{len(articles)} articles uploaded successfully!")
                 msg = f"Content saved to Supabase Storage: {target_date}_TechCrunch.json"
