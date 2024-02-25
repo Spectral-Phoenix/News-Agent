@@ -1,5 +1,8 @@
-Flask
-lxml
-google-generativeai
-requests
-pyGithub
+Flask==3.0.2
+PyGithub==2.2.0
+bs4==0.0.2
+lxml==5.1.0
+supabase==2.3.6
+google-generativeai==0.3.2
+requests==2.31.0
+python-dotenv==1.0.1
