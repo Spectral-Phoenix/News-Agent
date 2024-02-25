@@ -13,7 +13,7 @@ def home():
 @app.route('/process', methods=['GET'])
 def process():
     content = scrape_articles()
-    print("Sumamrising the scraped articles")
+    return content
     summarised_content = summarise(content)
     print("Summarisation completed")
     return summarised_content
