@@ -41,13 +41,13 @@ def generate_summary(model, article_content):
     prompt = f"{article_content}\n---\nYour task is to summarize the above article into 3-5 bullet points. Try to include the most important information which provides an overview of the article.\n---\n"
     try:
         answer = model.generate_content(prompt)
+        if hasattr(answer, 'prompt_feedback'):
+            print(f"Blocked Reason: {answer.prompt_feedback}")
         return answer.text.strip().replace("\n\n", "\n")
     except Exception as e:
         print(f"Error generating summary: {e}")
-        print(f"Blocked Reason: {answer.prompt_feedback}")
         return "Error: Summary generation failed."
-
-
+    
 def update_json_with_summaries(json_data, model):
     for article in json_data["articles"]:
         article["Summary"] = generate_summary(model, article["content"])
@@ -59,11 +59,13 @@ def generate_revised_title(model, article_title, article_content):
     )
     try:
         response = model.generate_content(revised_title_prompt)
+        if hasattr(response, 'prompt_feedback'):
+            print(f"Blocked Reason: {response.prompt_feedback}")
         return response.text.strip()
     except Exception as e:
         print(f"Error generating title: {str(e)}")
+        print(f"Blocked Reason: {response.prompt_feedback}")
         return f"Error: Title generation failed for '{article_title}'."
-
 
 def update_json_with_titles(json_data, model):
     for article in json_data["articles"]:
