@@ -1,4 +1,6 @@
 import discord
+import os
+from dotenv import load_dotenv
 from discord.ext import commands
 from core.generate import summarise
 from core.scrape import scrape_articles
@@ -6,9 +8,11 @@ from core.supabase import upload
 from datetime import date
 import asyncio
 
+load_dotenv()
+
 # Discord Bot setup
-bot_token = 'MTIxMTYyOTIzNTE2OTUyOTg5OA.GxGQlH.2FQTU6COot23h6oKOvJnsPDc1dQYUgw5ssX_Uw'
-channel_id = '1190268267076534292'
+bot_token = os.environ.get("DISCORD_BOT_TOKEN")
+channel_id = os.environ.get("DISCORD_CHANNEL_ID")
 
 # Create and set up intents
 intents = discord.Intents.default()
