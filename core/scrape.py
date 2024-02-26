@@ -1,12 +1,12 @@
 import requests
 from bs4 import BeautifulSoup
-from datetime import datetime
+from datetime import datetime, date
 import re
 import json
 import time
 
-def scrape_articles():
-    date_input = "2024-02-24"
+def scrape_articles(date_input):
+
 
     if not date_input:
         print("Please provide a valid date.")
