@@ -21,12 +21,17 @@ intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 async def send_to_discord(content):
-
-    channel = bot.get_channel(int(channel_id))
-
+    channel_iid = int(channel_id)
+    channel = bot.get_channel(channel_iid)
     if channel:
         for article in content["articles"]:
-            embed = discord.Embed(title=article['revised_title'], description=article['Summary'], color=0x00ff00)
+            embed = discord.Embed(
+                title=article['revised_title'],
+                description=article['Summary'],
+                color=0x00ff00
+            )
+            #embed.set_image(url=article['image_links'][0])  # Set the image with the first image link
+            embed.add_field(name="Article Link", value=article['link'], inline=False)
             await channel.send(embed=embed)
     else:
         print(f"Channel with ID {channel_id} not found.")
