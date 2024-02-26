@@ -1,6 +1,5 @@
 import json
 import os
-from datetime import date
 import google.generativeai as genai
 from dotenv import load_dotenv
 
@@ -38,14 +37,11 @@ def save_json_data(data, file_path):
 
 
 def generate_summary(model, article_content):
-    prompt = f"{article_content}\n---\nYour task is to summarize the above article into 3-5 bullet points. Try to include the most important information which provides an overview of the article.\n---\n"
+    prompt = f"{article_content}\n---\nYour task is to summarize the above article into 3 bullet points. Try to include the most important information which provides an overview of the article.\n---\n"
     try:
         answer = model.generate_content(prompt)
-        if hasattr(answer, 'prompt_feedback'):
-            print(f"Blocked Reason: {answer.prompt_feedback}")
         return answer.text.strip().replace("\n\n", "\n")
-    except Exception as e:
-        print(f"Error generating summary: {e}")
+    except Exception:
         return "Error: Summary generation failed."
     
 def update_json_with_summaries(json_data, model):
@@ -59,13 +55,9 @@ def generate_revised_title(model, article_title, article_content):
     )
     try:
         response = model.generate_content(revised_title_prompt)
-        if hasattr(response, 'prompt_feedback'):
-            print(f"Blocked Reason: {response.prompt_feedback}")
         return response.text.strip()
-    except Exception as e:
-        print(f"Error generating title: {str(e)}")
-        print(f"Blocked Reason: {response.prompt_feedback}")
-        return f"Error: Title generation failed for '{article_title}'."
+    except Exception:
+        return "Error: Title generation failed"
 
 def update_json_with_titles(json_data, model):
     for article in json_data["articles"]:

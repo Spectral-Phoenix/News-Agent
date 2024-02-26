@@ -21,10 +21,9 @@ intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 async def send_to_discord(content):
-    #Update this code later
-    channel_iid = int(channel_id)
-    channel = bot.get_channel(channel_iid)
-    print("Error Check!!")
+
+    channel = bot.get_channel(int(channel_id))
+
     if channel:
         for article in content["articles"]:
             embed = discord.Embed(title=article['revised_title'], description=article['Summary'], color=0x00ff00)
