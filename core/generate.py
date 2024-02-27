@@ -40,6 +40,7 @@ def generate_summary(model, article_content):
     prompt = f"{article_content}\n---\nYour task is to summarize the above article into 3 bullet points. Try to include the most important information which provides an overview of the article.\n---\n"
     try:
         answer = model.generate_content(prompt)
+        print("Summarising the content")
         return answer.text.strip().replace("\n\n", "\n")
     except Exception:
         return "Error: Summary generation failed."

@@ -59,6 +59,7 @@ async def job():
         print(f"Job completed at {date_input}")
     except Exception as e:
         print(f"An error occurred x: : {e}")
+        print("Job Stopped!")
 
     print("Scheduling next job in 1 hour...")
     await asyncio.sleep(3600)
