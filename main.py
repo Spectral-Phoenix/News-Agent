@@ -4,6 +4,7 @@ from core.generate import summarise
 from core.scrape import scrape_articles
 from core.supabase import upload
 from datetime import date
+import os
 import asyncio
 import discord
 from discord.ext import commands
