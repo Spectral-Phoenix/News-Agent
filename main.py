@@ -1,16 +1,13 @@
-import asyncio
-import os
-from datetime import date
-from threading import Thread
-
-import discord
-from discord.ext import commands
+from flask import Flask, jsonify
 from dotenv import load_dotenv
-from flask import Flask
-
 from core.generate import summarise
 from core.scrape import scrape_articles
 from core.supabase import upload
+from datetime import date
+import asyncio
+import discord
+from discord.ext import commands
+from threading import Thread
 
 load_dotenv()
 
@@ -36,7 +33,6 @@ async def send_to_discord(content):
                 description=article['Summary'],
                 color=0x00ff00
             )
-            # embed.set_image(url=article['image_links'][0])  # Set the image with the first image link
             embed.add_field(name="Article Link", value=article['link'], inline=False)
             await channel.send(embed=embed)
     else:
@@ -71,6 +67,11 @@ async def job():
     await asyncio.sleep(3600)
     asyncio.ensure_future(job())
 
+@app.route('/trigger_job', methods=['POST'])
+def trigger_job():
+    asyncio.ensure_future(job())
+    return jsonify({"status": "Job triggered successfully"})
+
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name} ({bot.user.id})')
@@ -80,10 +81,9 @@ async def on_ready():
     asyncio.ensure_future(job())
 
 if __name__ == '__main__':
-    # Start Flask app
-    flask_thread = Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 5000})
+    # Start Flask app and Discord bot in separate threads
+    flask_thread = Thread(target=app.run, kwargs={'debug': True})
     flask_thread.start()
 
-    # Start Discord bot
     bot_thread = Thread(target=bot.run, args=(bot_token,))
     bot_thread.start()
