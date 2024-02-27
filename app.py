@@ -51,12 +51,12 @@ async def job():
 
         print("Content Summarisation Completed")
 
-        await asyncio.gather(
-            asyncio.to_thread(upload, content, date_input),
-            send_to_discord(content)
-        )
+        await send_to_discord(content)
+        print("Message sent to Discord")
 
-        print(f"Job completed at {date_input}")
+        await asyncio.to_thread(upload, content, date_input)
+        print("JSON File uploaded")
+
     except Exception as e:
         print(f"An error occurred x: : {e}")
         print("Job Stopped!")
