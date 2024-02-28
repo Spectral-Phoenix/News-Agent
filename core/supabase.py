@@ -1,8 +1,9 @@
-import os
 import json
+import os
+
+import requests
 from dotenv import load_dotenv
 from supabase import Client, create_client
-import requests
 
 load_dotenv()
 
@@ -13,14 +14,30 @@ supabase: Client = create_client(url, key)
 def upload(content, target_date):
     # Get the existing JSON file from Supabase Storage
     file_url = f"https://tuwtkihewdnqtxitktpe.supabase.co/storage/v1/object/public/tech-crunch/{target_date}_TechCrunch.json"
-    response = requests.get(file_url)
-    existing_data = response.json()
+    
+    try:
+        response = requests.get(file_url)
+        existing_data = response.json()
 
-    # Update the article count
-    existing_data["no_of_articles"] += len(content["articles"])
+        # Check if 'no_of_articles' key is present in existing_data
+        if 'no_of_articles' not in existing_data:
+            # If not present, assume it's the first time
+            existing_data = {
+                "no_of_articles": len(content["articles"]),
+                "articles": content["articles"]
+            }
+        else:
+            # Update the article count
+            existing_data["no_of_articles"] += len(content["articles"])
+            # Append the new articles to the existing articles list
+            existing_data["articles"].extend(content["articles"])
 
-    # Append the new articles to the existing articles list
-    existing_data["articles"].extend(content["articles"])
+    except json.decoder.JSONDecodeError:
+        # If the file doesn't exist or cannot be decoded as JSON, assume it's the first time
+        existing_data = {
+            "no_of_articles": len(content["articles"]),
+            "articles": content["articles"]
+        }
 
     # Convert the updated data to JSON
     json_data = json.dumps(existing_data, ensure_ascii=False, indent=4)
