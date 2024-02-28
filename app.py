@@ -7,6 +7,11 @@ from core.scrape import scrape_articles
 from core.supabase import upload
 from datetime import date
 import asyncio
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -30,11 +35,11 @@ async def send_to_discord(content):
                 description=article['Summary'],
                 color=0x00ff00
             )
-            #embed.set_image(url=article['image_links'][0])  # Set the image with the first image link
+            embed.set_image(url=article['image_links'][0])  # Set the image with the first image link
             embed.add_field(name="Article Link", value=article['link'], inline=False)
             await channel.send(embed=embed)
     else:
-        print(f"Channel with ID {channel_id} not found.")
+        logger.error(f"Channel with ID {channel_id} not found.")
 
 async def process(date_input):
     content = await asyncio.to_thread(scrape_articles, date_input)
@@ -43,32 +48,32 @@ async def process(date_input):
 
 async def job():
     date_input = str(date.today())
-
-    print(f"Job started at {date_input}")
-
+    
     try:
         content = await process(date_input)
 
-        print("Content Summarisation Completed")
+        logger.info("1/3 : Content Summarisation Completed")
 
         await send_to_discord(content)
-        print("Message sent to Discord")
+        logger.info("2/3 : Message sent to Discord")
 
         await asyncio.to_thread(upload, content, date_input)
-        print("JSON File uploaded")
+        logger.info("3/3: JSON File uploaded")
 
     except Exception as e:
-        print(f"An error occurred x: : {e}")
-        print("Job Stopped!")
+        logger.error(f"An error occurred: {e}")
+        logger.error("Job Stopped!")
 
-    print("Scheduling next job in 1 hour...")
-    await asyncio.sleep(3600)
+    for _ in range(6):  # Run this loop 6 times (every 10 minutes for 1 hour)
+        logger.info(f"Time remaining for the next job: {10 * (_ + 1)} minutes")
+        await asyncio.sleep(600)  # Sleep for 10 minutes
+
+    logger.info("Scheduling next job in 1 hour...")
     asyncio.ensure_future(job())
 
 @bot.event
 async def on_ready():
-    print(f'Logged in as {bot.user.name} ({bot.user.id})')
-    print('------')
+    logger.info(f'Logged in as {bot.user.name} ({bot.user.id})')
     
     # Schedule initial job
     asyncio.ensure_future(job())

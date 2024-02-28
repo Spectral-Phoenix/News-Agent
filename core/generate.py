@@ -1,10 +1,14 @@
 import json
 import os
+import logging
 import google.generativeai as genai
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 def configure_generative_model():
     genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
@@ -40,9 +44,9 @@ def generate_summary(model, article_content):
     prompt = f"{article_content}\n---\nYour task is to summarize the above article into 3 bullet points. Try to include the most important information which provides an overview of the article.\n---\n"
     try:
         answer = model.generate_content(prompt)
-        print("Summarising the content")
         return answer.text.strip().replace("\n\n", "\n")
     except Exception:
+        logging.error("Error: Summary generation failed.")
         return "Error: Summary generation failed."
     
 def update_json_with_summaries(json_data, model):
@@ -58,6 +62,7 @@ def generate_revised_title(model, article_title, article_content):
         response = model.generate_content(revised_title_prompt)
         return response.text.strip()
     except Exception:
+        logging.error("Error: Title generation failed")
         return "Error: Title generation failed"
 
 def update_json_with_titles(json_data, model):

@@ -4,17 +4,20 @@ from datetime import datetime
 import re
 import json
 import time
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 
 def load_json_file(target_date):
     try:
         json_url = f"https://tuwtkihewdnqtxitktpe.supabase.co/storage/v1/object/public/tech-crunch/{target_date}_TechCrunch.json"
-        print(json_url)
         response = requests.get(json_url)
         response.raise_for_status()  # Raise an exception if the request failed (non-2xx status code)
         json_data = response.json()  # Directly parse the JSON content from the response
         return json_data
     except requests.exceptions.RequestException as e:
-        print(f"Error loading JSON file: {e}")
+        logging.error(f"Error loading JSON file: {e}")
         return {}
 
 def extract_date(link):
@@ -32,7 +35,7 @@ def scrape_links(category_url, category):
         soup = BeautifulSoup(resp.text, 'lxml')
         return [(a['href'], category) for a in soup.select('h2 a')]
     except requests.exceptions.RequestException as req_exc:
-        print(f"Error scraping {category_url}: {req_exc}")
+        logging.error(f"Error scraping {category_url}: {req_exc}")
         return []
 
 def parse_article(link):
@@ -53,25 +56,25 @@ def parse_article(link):
                 "link": link,
             }
         else:
-            print(f"Error parsing article content for {link}: Title or content not found.")
+            logging.error(f"Error parsing article content for {link}: Title or content not found.")
             return None
 
     except requests.exceptions.RequestException as req_exc:
-        print(f"Error fetching article content for {link}: {req_exc}")
+        logging.error(f"Error fetching article content for {link}: {req_exc}")
         return None
 
     except Exception as e:
-        print(f"Error parsing article content for {link}: {e}")
+        logging.error(f"Error parsing article content for {link}: {e}")
         return None
 
 def scrape_articles(date_input):
     if not date_input:
-        print("Please provide a valid date.")
+        logging.error("Please provide a valid date.")
         return
     try:
         target_date = datetime.strptime(date_input, "%Y-%m-%d").date()
     except ValueError:
-        print("Invalid date format. Please use YYYY-MM-DD.")
+        logging.error("Invalid date format. Please use YYYY-MM-DD.")
         return
 
     # Config
@@ -81,7 +84,7 @@ def scrape_articles(date_input):
                   "media-entertainment", "privacy", "robotics", "security", "social", "space",
                   "startups", "transportation", "venture"]
 
-    print("Fetching articles...")
+    logging.info("Fetching articles...")
 
     start_time = time.time()
     links = set()  # Set to store unique links
@@ -131,7 +134,7 @@ def scrape_articles(date_input):
     json_buffer = json_data.encode('utf-8')
 
     time_taken_msg = "Time taken to scrape: " + str(elapsed_time_in_seconds) + " seconds"
-    print(f"{len(articles)} articles scraped successfully!")
-    print(time_taken_msg)
+    logging.info(f"{len(articles)} articles scraped successfully!")
+    logging.info(time_taken_msg)
 
     return json_buffer
