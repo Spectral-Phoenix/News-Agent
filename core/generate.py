@@ -63,8 +63,8 @@ def generate_summary(model, article_content):
         return answer.text.strip().replace("\n\n", "\n")
     except Exception:
         logging.error("Error: Summary generation failed, Switching to Fallback Model")
-
-        return cohere_summarize(article_content)
+        fallback_title = cohere_summarize(prompt)
+        return fallback_title
     
 def update_json_with_summaries(json_data, model):
     for article in json_data["articles"]:
@@ -80,7 +80,8 @@ def generate_revised_title(model, article_title, article_content):
         return response.text.strip()
     except Exception:
         logging.error("Error: Title generation failed, Switching to Fallback Model")
-        return cohere_summarize(revised_title_prompt)
+        fallback_content = cohere_summarize(revised_title_prompt)
+        return fallback_content
 
 def update_json_with_titles(json_data, model):
     for article in json_data["articles"]:
