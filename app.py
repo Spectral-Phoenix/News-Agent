@@ -11,6 +11,7 @@ from core.generate import summarise
 from core.scrape import scrape_articles
 from core.supabase import upload
 
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -30,6 +31,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 async def send_to_discord(content):
     channel_iid = int(channel_id)
     channel = bot.get_channel(channel_iid)
+    
     if channel:
         for article in content["articles"]:
             embed = discord.Embed(
@@ -37,9 +39,16 @@ async def send_to_discord(content):
                 description=article['Summary'],
                 color=0x00ff00
             )
-            embed.set_image(url=article['image_links'][0])  # Set the image with the first image link
+            
+            if article['image_links'] and article['image_links'][0].startswith(('http://', 'https://')):
+                embed.set_image(url=article['image_links'][0])
+            
             embed.add_field(name="Article Link", value=article['link'], inline=False)
-            await channel.send(embed=embed)
+            
+            try:
+                await channel.send(embed=embed)
+            except discord.HTTPException as e:
+                logger.error(f"Error sending message to Discord: {e}")
     else:
         logger.error(f"Channel with ID {channel_id} not found.")
 
@@ -70,12 +79,11 @@ async def job():
     await asyncio.sleep(3600)
     asyncio.ensure_future(job())
 
-@bot.event
-async def on_ready():
-    logger.info(f'Logged in as {bot.user.name} ({bot.user.id})')
-    
-    # Schedule initial job
-    asyncio.ensure_future(job())
+
+@bot.command(name='ping')
+async def ping(ctx):
+    latency = round(bot.latency * 1000)  # Convert to milliseconds
+    await ctx.send(f'Pong! Latency: {latency}ms')
 
 # Start the bot
 bot.run(bot_token)

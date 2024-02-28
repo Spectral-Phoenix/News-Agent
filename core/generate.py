@@ -47,6 +47,19 @@ def cohere_summarize(content):
     ) 
     return response.summary
 
+def cohere_title(question):
+
+    response = co.generate(
+      model='command',
+      prompt= question,
+      max_tokens=300,
+      temperature=0.9,
+      k=0,
+      stop_sequences=[],
+      return_likelihoods='NONE')
+
+    return response.generations[0].text
+
 def load_json_data(json_data):
     return json.loads(json_data)
 
@@ -63,8 +76,8 @@ def generate_summary(model, article_content):
         return answer.text.strip().replace("\n\n", "\n")
     except Exception:
         logging.error("Error: Summary generation failed, Switching to Fallback Model")
-        fallback_title = cohere_summarize(prompt)
-        return fallback_title
+        fallback_content = cohere_summarize(prompt)
+        return fallback_content
     
 def update_json_with_summaries(json_data, model):
     for article in json_data["articles"]:
@@ -80,13 +93,12 @@ def generate_revised_title(model, article_title, article_content):
         return response.text.strip()
     except Exception:
         logging.error("Error: Title generation failed, Switching to Fallback Model")
-        fallback_content = cohere_summarize(revised_title_prompt)
-        return fallback_content
+        fallback_title_content = cohere_title(revised_title_prompt)
+        return fallback_title_content
 
 def update_json_with_titles(json_data, model):
     for article in json_data["articles"]:
         article["revised_title"] = generate_revised_title(model, article["title"], article["content"])
-
 
 def summarise(json_buffer):
     model = configure_generative_model()
