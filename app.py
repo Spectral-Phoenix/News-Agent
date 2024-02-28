@@ -1,13 +1,15 @@
-import discord
+import asyncio
+import logging
 import os
-from dotenv import load_dotenv
+from datetime import date
+
+import discord
 from discord.ext import commands
+from dotenv import load_dotenv
+
 from core.generate import summarise
 from core.scrape import scrape_articles
 from core.supabase import upload
-from datetime import date
-import asyncio
-import logging
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -48,7 +50,7 @@ async def process(date_input):
 
 async def job():
     date_input = str(date.today())
-    
+
     try:
         content = await process(date_input)
 

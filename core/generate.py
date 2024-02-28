@@ -1,6 +1,7 @@
 import json
-import os
 import logging
+import os
+
 import google.generativeai as genai
 from dotenv import load_dotenv
 

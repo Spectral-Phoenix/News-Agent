@@ -1,10 +1,11 @@
+import json
+import logging
+import re
+import time
+from datetime import datetime
+
 import requests
 from bs4 import BeautifulSoup
-from datetime import datetime
-import re
-import json
-import time
-import logging
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
