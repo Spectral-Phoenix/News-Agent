@@ -66,11 +66,8 @@ async def job():
         logger.error(f"An error occurred: {e}")
         logger.error("Job Stopped!")
 
-    for _ in range(6):  # Run this loop 6 times (every 10 minutes for 1 hour)
-        logger.info(f"Time remaining for the next job: {10 * (_ + 1)} minutes")
-        await asyncio.sleep(600)  # Sleep for 10 minutes
-
     logger.info("Scheduling next job in 1 hour...")
+    await asyncio.sleep(3600)
     asyncio.ensure_future(job())
 
 @bot.event

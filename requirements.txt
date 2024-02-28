@@ -7,4 +7,5 @@ google-generativeai==0.3.2
 requests==2.31.0
 python-dotenv==1.0.1
 schedule==1.2.1
+cohere==4.5.1
 discord-py==2.3.2

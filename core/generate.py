@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import cohere 
 
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -11,8 +12,11 @@ load_dotenv()
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
+co = cohere.Client(os.environ.get('COHERE_API_KEY'))
+
 def configure_generative_model():
     genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
     generation_config = {
         "temperature": 0.9,
         "top_p": 0.1,
@@ -31,6 +35,17 @@ def configure_generative_model():
         safety_settings=safety_settings,
     )
 
+def cohere_summarize(content):
+
+    response = co.summarize( 
+      text=content,
+      length='medium',
+      format='bullets',
+      model='command-nightly',
+      additional_command='',
+      temperature=0.3,
+    ) 
+    return response.summary
 
 def load_json_data(json_data):
     return json.loads(json_data)
@@ -47,8 +62,9 @@ def generate_summary(model, article_content):
         answer = model.generate_content(prompt)
         return answer.text.strip().replace("\n\n", "\n")
     except Exception:
-        logging.error("Error: Summary generation failed.")
-        return "Error: Summary generation failed."
+        logging.error("Error: Summary generation failed, Switching to Fallback Model")
+
+        return cohere_summarize(article_content)
     
 def update_json_with_summaries(json_data, model):
     for article in json_data["articles"]:
@@ -63,8 +79,8 @@ def generate_revised_title(model, article_title, article_content):
         response = model.generate_content(revised_title_prompt)
         return response.text.strip()
     except Exception:
-        logging.error("Error: Title generation failed")
-        return "Error: Title generation failed"
+        logging.error("Error: Title generation failed, Switching to Fallback Model")
+        return cohere_summarize(revised_title_prompt)
 
 def update_json_with_titles(json_data, model):
     for article in json_data["articles"]:
