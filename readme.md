@@ -13,6 +13,8 @@ To schedule the pipeline to run daily at a specific time, you can use a task sch
 Configure the scheduler to run the following command at the desired time:
 `python app.py`
 
+![news agent](https://github.com/Spectral-Phoenix/News-Agent/assets/140725262/d0cc6ecd-b258-4034-b808-8f76aa8af0b1)
+
 ## Configuration
 
 GEMINI_API_KEY = Google Gemini API Key
