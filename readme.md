@@ -13,26 +13,16 @@ To schedule the pipeline to run daily at a specific time, you can use a task sch
 Configure the scheduler to run the following command at the desired time:
 `python app.py`
 
-## Requirements
-Python 3.9 or later
-The following Python libraries:
-Flask
-PyGithub
-bs4
-lxml
-supabase
-google-generativeai
-requests
-python-dotenv
-schedule
-cohere
-discord-py
-
 ## Configuration
 
-GEMINI_API_KEY = Google Gemini API Key.\n
-SUPABASE_URL =  The URL of your Supabase project.\n
-SUPABASE_KEY = The API key for your Supabase project.\n
-DISCORD_BOT_TOKEN = The token for your Discord bot.\n
-DISCORD_CHANNEL_ID = The ID of the Discord channel where you want the articles to be sent.\n
-COHERE_API_KEY = Cohere Coral API Key.
+GEMINI_API_KEY = Google Gemini API Key
+
+SUPABASE_URL =  The URL of your Supabase project
+
+SUPABASE_KEY = The API key for your Supabase project
+
+DISCORD_BOT_TOKEN = The token for your Discord bot
+
+DISCORD_CHANNEL_ID = The ID of the Discord channel where you want the articles to be sent
+
+COHERE_API_KEY = Cohere Coral API Key
