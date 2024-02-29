@@ -28,3 +28,8 @@ DISCORD_BOT_TOKEN = The token for your Discord bot
 DISCORD_CHANNEL_ID = The ID of the Discord channel where you want the articles to be sent
 
 COHERE_API_KEY = Cohere Coral API Key
+
+## Roadmap
+
+- [ ] Add more sources
+- [ ] Implement Ranking
