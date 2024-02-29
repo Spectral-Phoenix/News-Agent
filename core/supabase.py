@@ -10,18 +10,37 @@ from supabase import Client, create_client
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Load environment variables from a .env file
 load_dotenv()
 
+# Retrieve Supabase URL and API Key from environment variables
 url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")
+
+# Create a Supabase client
 supabase: Client = create_client(url, key)
 
 
 def upload(content, target_date):
+    """
+    Uploads or updates JSON content to Supabase Storage.
+
+    Parameters:
+        content (dict): JSON content to be uploaded or updated.
+        target_date (str): Date used in the filename for storage.
+
+    Raises:
+        Exception: Any exception encountered during the Supabase storage operation.
+
+    Returns:
+        None
+    """
+
     # Get the existing JSON file from Supabase Storage
     file_url = f"https://tuwtkihewdnqtxitktpe.supabase.co/storage/v1/object/public/tech-crunch/{target_date}_TechCrunch.json"
 
     try:
+        # Try to retrieve existing data from the file
         response = requests.get(file_url)
         existing_data = response.json()
 

@@ -1,8 +1,8 @@
 import json
 import logging
 import os
-import cohere 
 
+import cohere
 import google.generativeai as genai
 from dotenv import load_dotenv
 
