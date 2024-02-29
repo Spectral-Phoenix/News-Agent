@@ -28,6 +28,7 @@ intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 async def send_to_discord(content):
+    """Send summarized articles to the specified Discord channel."""
     channel_iid = int(channel_id)
     channel = bot.get_channel(channel_iid)
     if channel:
@@ -44,11 +45,13 @@ async def send_to_discord(content):
         logger.error(f"Channel with ID {channel_id} not found.")
 
 async def process(date_input):
+    """Process articles by scraping and summarizing them."""
     content = await asyncio.to_thread(scrape_articles, date_input)
     summarised_content = await asyncio.to_thread(summarise, content)
     return summarised_content
 
 async def job():
+    """Scheduled job to run the bot tasks."""
     date_input = str(date.today())
 
     try:
@@ -72,6 +75,7 @@ async def job():
 
 @bot.event
 async def on_ready():
+    """Event handler triggered when the bot is ready."""
     logger.info(f'Logged in as {bot.user.name} ({bot.user.id})')
     
     # Schedule initial job
