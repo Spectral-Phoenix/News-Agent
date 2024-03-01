@@ -29,10 +29,10 @@ json_url = f"https://tuwtkihewdnqtxitktpe.supabase.co/storage/v1/object/public/t
 json_data = fetch_json_data(json_url)
 
 if json_data:
-    if st.button("⬅️ Go Back"):
-        switch_page("main")
+    #if st.button("⬅️ Go Back"):
+        #switch_page("main")
 
-    st.title(f"{json_data['source']} - {json_data['date']}")
+    st.title(f"TechCrunch - {target_date}")
     st.write(f"Number of Articles: {json_data['no_of_articles']}")
 
     count = 454
