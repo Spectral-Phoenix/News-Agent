@@ -27,6 +27,7 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+# Function to send summaries on Discord Channel 
 async def send_to_discord(content):
     """Send summarized articles to the specified Discord channel."""
     channel_iid = int(channel_id)
@@ -50,6 +51,7 @@ async def process(date_input):
     summarised_content = await asyncio.to_thread(summarise, content)
     return summarised_content
 
+# Main Function
 async def job():
     """Scheduled job to run the bot tasks."""
     date_input = str(date.today())
