@@ -2,7 +2,7 @@ import json
 import streamlit as st
 import requests
 from datetime import date
-from nav import switch_page
+#from nav import switch_page
 from annotated_text import annotated_text
 
 st.set_page_config(
