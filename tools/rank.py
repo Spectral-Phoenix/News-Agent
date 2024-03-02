@@ -27,7 +27,7 @@ json_data = json.dumps(data, ensure_ascii=False, indent=4)
 
 
 # Extract revised titles from the articles
-revised_titles = [article.get('revised_title', '') for article in json_data.get('articles', [])]
+revised_titles = [article.get('revised_title', '') for article in data.get('articles', [])]
 
 # Print the extracted revised titles
 for idx, title in enumerate(revised_titles, 1):
