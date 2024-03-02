@@ -48,6 +48,8 @@ def upload(content, target_date):
         if "no_of_articles" not in existing_data:
             # If not present, assume it's the first time
             existing_data = {
+                "source": "TechCrunch",
+                "date": str(target_date),
                 "no_of_articles": len(content["articles"]),
                 "articles": content["articles"],
             }
