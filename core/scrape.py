@@ -160,9 +160,10 @@ def scrape_articles(date_input):
                 break
 
         article = parse_article(link)
-        if article and article["link"] not in existing_articles:
+        if article and article["link"] not in existing_articles:  
             article["category"] = category
             articles.append(article)
+            existing_articles[article["link"]] = article  # Add parsed article to the dictionary
 
     end_time = time.time()
     elapsed_time = end_time - start_time
