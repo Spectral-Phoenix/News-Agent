@@ -11,7 +11,7 @@ st.set_page_config(
     layout="wide"
 )
 
-target_date = str(date.today())
+target_date = str("2024-03-26")
 
 # Function to fetch JSON data from the cloud
 def fetch_json_data(url):
@@ -54,7 +54,7 @@ if json_data:
                     st.image(article['image_links'][0], caption=None, width=None, use_column_width=True, clamp=False,
                              channels="RGB", output_format="auto")
                 st.divider()
-                st.markdown(f"<font face ='DM Sans'>Read more: [{json_data['source']}]({article['link']})</font>",
+                st.markdown(f"<font face ='DM Sans'>Read more: [TechCrunch]({article['link']})</font>",
                             unsafe_allow_html=True)
                 col1, col2 = st.columns([1, 1])
                 with col1:
