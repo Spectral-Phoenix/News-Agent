@@ -44,7 +44,7 @@ if json_data:
             with col1:
                 st.subheader(article['revised_title'])
                 st.caption(f"Original Title: {article['title']}")
-                annotated_text("Category: ", (article['category'], ""))
+                # annotated_text("Category: ", (article['category'], ""))
                 with open("style.css") as css:
                     st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
                 st.markdown(f"<font face='DM Sans'>{article['Summary']}</font>", unsafe_allow_html=True)
