@@ -11,7 +11,8 @@ st.set_page_config(
     layout="wide"
 )
 
-target_date = str("2024-03-26")
+
+target_date = str("2024-03-27")
 
 # Function to fetch JSON data from the cloud
 def fetch_json_data(url):
@@ -45,16 +46,15 @@ if json_data:
                 st.subheader(article['revised_title'])
                 st.caption(f"Original Title: {article['title']}")
                 # annotated_text("Category: ", (article['category'], ""))
-                with open("style.css") as css:
-                    st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
-                st.markdown(f"<font face='DM Sans'>{article['Summary']}</font>", unsafe_allow_html=True)
+                
+                st.markdown(f"{article['Summary']}</font>", unsafe_allow_html=True)
             with col2:
                 # Display only the first image link if available
                 if 'image_links' in article and len(article['image_links']) > 0:
                     st.image(article['image_links'][0], caption=None, width=None, use_column_width=True, clamp=False,
                              channels="RGB", output_format="auto")
                 st.divider()
-                st.markdown(f"<font face ='DM Sans'>Read more: [TechCrunch]({article['link']})</font>",
+                st.markdown(f"<font face ='Mona-Sans'>Read more: [TechCrunch]({article['link']})</font>",
                             unsafe_allow_html=True)
                 col1, col2 = st.columns([1, 1])
                 with col1:

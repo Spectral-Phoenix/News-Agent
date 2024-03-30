@@ -1,3 +1,4 @@
-body {
-    font-family: 'DM Sans', sans-serif;
+@font-face {
+    font-family: 'MyCustomFont'; /* Give your font a name */ 
+    src: url('./fonts/Mona-Sans.ttf') format('truetype'); /* Adjust the path */
 }
