@@ -20,6 +20,9 @@ key: str = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
 
 def clean_data(data):
+    def remove_non_ascii(text):
+        return ''.join(i for i in text if ord(i) < 128)
+    
     if isinstance(data, dict):
         return {clean_data(k): clean_data(v) for k, v in data.items()}
     elif isinstance(data, list):
@@ -28,9 +31,6 @@ def clean_data(data):
         return remove_non_ascii(data)
     else:
         return data
-
-def remove_non_ascii(text):
-    return ''.join(i for i in text if ord(i)<128)
 
 def clean_and_upload_to_supabase(target_date):
     """

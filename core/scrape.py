@@ -11,20 +11,12 @@ from bs4 import BeautifulSoup
 logging.basicConfig(level=logging.INFO)
 
 def load_json_file(target_date):
-    """
-    Load JSON data from a specified URL based on the target date.
 
-    Parameters:
-        target_date (str): The target date in the format 'YYYY-MM-DD'.
-
-    Returns:
-        dict: Parsed JSON data.
-    """
     try:
         json_url = f"https://tuwtkihewdnqtxitktpe.supabase.co/storage/v1/object/public/tech-crunch/{target_date}_TechCrunch.json"
         response = requests.get(json_url)
-        response.raise_for_status()  # Raise an exception if the request failed (non-2xx status code)
-        json_data = response.json()  # Directly parse the JSON content from the response
+        response.raise_for_status()
+        json_data = response.json()
         return json_data
     except requests.exceptions.RequestException as e:
         logging.error(f"Error loading JSON file: {e}")
@@ -48,16 +40,7 @@ def extract_date(link):
         return None
 
 def scrape_links(category_url, category):
-    """
-    Scrape links from a specified category URL.
 
-    Parameters:
-        category_url (str): URL of the category.
-        category (str): Category name.
-
-    Returns:
-        list: List of tuples containing (link, category).
-    """
     try:
         resp = requests.get(category_url)
         resp.raise_for_status()
@@ -68,15 +51,7 @@ def scrape_links(category_url, category):
         return []
 
 def parse_article(link):
-    """
-    Parse article content from a specified article URL.
 
-    Parameters:
-        link (str): URL of the article.
-
-    Returns:
-        dict or None: Parsed article data or None if parsing fails.
-    """
     try:
         article = requests.get(link)
         article.raise_for_status()
@@ -106,15 +81,7 @@ def parse_article(link):
         return None
 
 def scrape_articles(date_input):
-    """
-    Scrape articles from TechCrunch based on a specified date.
 
-    Parameters:
-        date_input (str): Target date in the format 'YYYY-MM-DD'.
-
-    Returns:
-        bytes or None: JSON data in bytes or None if errors occur during the process.
-    """
     if not date_input:
         logging.error("Please provide a valid date.")
         return
@@ -177,7 +144,7 @@ def scrape_articles(date_input):
         "articles": articles
     }
 
-    json_data = json.dumps(data, ensure_ascii=False, indent=4)
+    json_data = json.dumps(data, ensure_ascii=True, indent=4)
 
     json_buffer = json_data.encode('utf-8')
 

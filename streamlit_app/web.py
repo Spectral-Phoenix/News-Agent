@@ -11,7 +11,6 @@ st.set_page_config(
     layout="wide"
 )
 
-
 target_date = str("2024-03-27")
 
 # Function to fetch JSON data from the cloud
