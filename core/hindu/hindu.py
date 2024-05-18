@@ -6,6 +6,7 @@ from typing import Dict, List
 import requests
 from bs4 import BeautifulSoup
 from newspaper  import Article
+from supa_base import upload
 
 logging.basicConfig(level=logging.ERROR)
 
@@ -62,10 +63,10 @@ def main():
         print(f"No of Links: {len(links)}")
         url_list.update(links)
     
-    with open('links.txt', 'w') as f:
-        for link in url_list:
-            f.write(f"{link}\n")
-        print("Links Saved to links.txt")
+    # with open('links.txt', 'w') as f:
+    #     for link in url_list:
+    #         f.write(f"{link}\n")
+    #     print("Links Saved to links.txt")
 
     scraped_data = []
     for i, link in enumerate(url_list, start=1):
@@ -73,9 +74,15 @@ def main():
         text_data = scrape_text(link)
         if text_data:
             scraped_data.append(text_data)
-    with open('hindu.json', 'w') as f:
+
+    today = str(date.today())
+    file_path =  f"{today}_the_hindu.json"
+
+    with open(f'core/hindu/{file_path}', 'w') as f:
         json.dump(scraped_data, f,ensure_ascii=True, indent=4)
         print("Scraping Completed")
+
+    upload("tech-crunch", file_path, f"core/hindu/{file_path}")
 
 if __name__ == "__main__":
     main()

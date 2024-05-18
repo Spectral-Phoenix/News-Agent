@@ -20,7 +20,6 @@ key: str = os.environ.get("SUPABASE_KEY")
 # Create a Supabase client
 supabase: Client = create_client(url, key)
 
-
 def upload(content, target_date):
     """
     Uploads or updates JSON content to Supabase Storage.
