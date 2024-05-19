@@ -1,7 +1,8 @@
 import json
-import requests
 import logging
 import os
+
+import requests
 from dotenv import load_dotenv
 from supabase import Client, create_client
 
