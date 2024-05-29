@@ -2,9 +2,11 @@ import json
 import logging
 from datetime import date
 from typing import Dict, List
+
 import requests
 from bs4 import BeautifulSoup
 from newspaper import Article
+
 from supa_base import upload
 
 logging.basicConfig(level=logging.ERROR)
@@ -28,12 +30,14 @@ def scrape_text(link: str) -> Dict[str, str]:
         article.parse()
         article_date = article.publish_date.date()
         if article_date == date.today():
-            return {
-                'title': article.title,
-                'publish_date': article.publish_date.strftime('%Y-%m-%d'),
-                'text': article.text,
-                'url': link,
-            }
+
+            if len(article.text) >= 130:
+                return {
+                    'title': article.title,
+                    'publish_date': article.publish_date.strftime('%Y-%m-%d'),
+                    'text': article.text,
+                    'url': link,
+                }
     except Exception:
         logging.error(f"Unexpected error occurred while scraping {link}")
     return None
