@@ -2,7 +2,6 @@ import json
 import time
 from datetime import date
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_together import Together
 from supa_base import upload
 from openai import OpenAI
 
@@ -10,21 +9,13 @@ today = str(date.today())
 
 client = OpenAI(
   base_url = "https://integrate.api.nvidia.com/v1",
-  api_key = "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"
+  api_key = "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"
 )
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-1.5-flash",
     google_api_key="AIzaSyCVamDnNAeezeywfPTet9t_Fvd_DTTIuu0",
 )
-
-llm_together = Together(
-    model="microsoft/phi-2",
-    together_api_key="2a496cddf2d909bf1a7b922043d26a78b32e5de7b6f151c1afe0132ad9ad3784",
-    max_tokens=500,
-    temperature=0.5,
-)
-
 
 with open(f'data/the_hindu/{today}_the_hindu.json', 'r') as f:
     data = json.load(f)
@@ -106,9 +97,11 @@ def categorise(article):
             Weather: Articles reporting routine weather updates or forecasts.
             Traffic: Articles focusing on local traffic conditions or updates.
             Local: Articles covering hyperlocal events or issues that have limited broader relevance.
+            World: Articles focusing on world events that are not directly related to India or the UPSC syllabus.
 
             Additionally, you can mark an article as "not important" if it lacks depth, analysis, or meaningful insights, and merely provides a surface-level or sensational account of an event or issue.
-
+            Strictly mark articles as not important if they are analysis, editorials, essays or something like that.
+            
         4. Do not provide any additional information or explanations; only return the JSON content.
         5. Do not add any markdown formatting for the JSON content like ```json, #, *,etc.; return it in plain text format.
 
@@ -128,9 +121,10 @@ def categorise(article):
         Output:
 
     """
+    # Add Prompt Length management
 
     completion = client.chat.completions.create(
-      model="microsoft/phi-3-medium-4k-instruct",
+      model="microsoft/phi-3-small-8k-instruct",
       messages=[{"role":"user","content":f"{prompt}"}],
       temperature=0.4,
       top_p=0.7,
@@ -139,12 +133,17 @@ def categorise(article):
     )
     try:
         response = completion.choices[0].message.content
-        if response.startswith("```json"):
-            response = response[8:-3]
         category_data = json.loads(response)
+        
+        if isinstance(category_data, list) and len(category_data) > 0:
+            category_data = category_data[0]
+            
         return category_data['category'], category_data['relevance']
     except json.JSONDecodeError:
         print(f"Error parsing JSON for article: {article['title']}")
+        return None, None
+    except (TypeError, KeyError) as e:
+        print(f"Error accessing response data: {e}")
         return None, None
 
 def main():
@@ -153,7 +152,13 @@ def main():
 
     for article in articles:
         print(f"Categorising article {count+1}/{length}")
-        category, relevance = categorise(article)
+        try:
+          category, relevance = categorise(article)
+        except Exception as e:
+          print(f"Error categorising article: {e}")
+          category = "Unknown"
+          relevance = 0
+
         if category and relevance:
             article["category"] = category
             article["relevance"] = relevance
