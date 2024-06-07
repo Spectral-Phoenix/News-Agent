@@ -1,3 +1,6 @@
 .env
 .venv
 data
+.idx
+__pycache__
+test.json

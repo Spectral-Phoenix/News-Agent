@@ -1,10 +1,10 @@
 import json
 import logging
-import newspaper
 import re
 import time
 from datetime import datetime
 
+import newspaper
 import requests
 from bs4 import BeautifulSoup
 
@@ -17,7 +17,7 @@ def extract_date(link):
 
     Parameters:
         link (str): URL string.
-
+        
     Returns:
         datetime.date or None: Extracted date or None if not found.
     """
@@ -47,7 +47,6 @@ def scrape_links(category_url, category):
     except requests.exceptions.RequestException as req_exc:
         logging.error(f"Error scraping {category_url}: {req_exc}")
         return []
-
 
 def parse_article(link):
     """
@@ -91,7 +90,7 @@ def scrape_articles(date_input):
         date_input (str): Target date in the format 'YYYY-MM-DD'.
 
     Returns:
-        bytes or None: JSON data in bytes or None if errors occur during the process.
+        str or None: Filename of the saved JSON data or None if errors occur during the process.
     """
     if not date_input:
         logging.error("Please provide a valid date.")
@@ -118,24 +117,17 @@ def scrape_articles(date_input):
         category_url = BASE_URL + category + "/"
         category_links = scrape_links(category_url, category)
 
-        for link, category in category_links:
+        for link, _ in category_links:
             date = extract_date(link)
-
             if date == target_date:
                 links.add(link)
 
     articles = []
 
     for link in links:
-        category = None
-        for _, cat in category_links:
-            if _ == link:
-                category = cat
-                break
-
         article = parse_article(link)
-        # article["category"] = category
-        articles.append(article)
+        if article:
+            articles.append(article)
 
     end_time = time.time()
     elapsed_time = end_time - start_time
@@ -149,24 +141,20 @@ def scrape_articles(date_input):
         "articles": articles
     }
 
-    for article in data["articles"]:
-        if isinstance(article.get("image_links"), set):
-            article["image_links"] = list(article["image_links"]) 
-
-    filename = f"techcrunch_articles_{target_date}.json"
+    filename = f"data/{target_date}_techcrunch.json"
 
     try:
         with open(filename, 'w', encoding='utf-8') as json_file:
             json.dump(data, json_file, ensure_ascii=False, indent=4)
 
         logging.info(f"{len(articles)} articles scraped successfully and saved to {filename}!")
-        logging.info(elapsed_time_in_seconds)
+        logging.info(f"Elapsed time: {elapsed_time_in_seconds} seconds")
         return filename
 
     except (IOError, OSError) as file_error:
         logging.error(f"Error writing data to JSON file: {file_error}")
         return None
 
-if __name__ == "__main__":
-    date_input = input("Enter the date (YYYY-MM-DD): ")
-    scrape_articles(date_input)
+# if __name__ == "__main__":
+#     date_input = input("Enter the date (YYYY-MM-DD): ")
+#     scrape_articles(date_input)
