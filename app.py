@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import aiohttp
 import io
 from PIL import Image
+from datetime import datetime
 
 load_dotenv()
 
@@ -37,6 +38,27 @@ def resize_image(image_data):
     buffered.seek(0)
     return buffered
 
+def create_news_embed(article):
+    embed = discord.Embed(
+        title=article.get('revised_title', 'No Title'),
+        description=article.get('Summary', 'No summary available.'),
+        color=0x00AAFF,
+        url=article.get('link', 'https://techcrunch.com')
+    )
+
+    if article.get('image_links'):
+        embed.set_thumbnail(url=article['image_links'])
+
+    embed.add_field(name="Read Full Article", value=f"[Click here]({article.get('link', 'https://techcrunch.com')})", inline=True)
+    embed.add_field(name="Source", value="TechCrunch", inline=True)
+    
+    # You can add more fields here, like category, author, etc.
+    # embed.add_field(name="Category", value=article.get('category', 'Tech'), inline=True)
+
+    embed.set_footer(text="Powered by MassCoders | News Agent")
+
+    return embed
+
 async def send_technews():
     try:
         with open('2024-06-07_technews.json', 'r') as f:
@@ -51,26 +73,24 @@ async def send_technews():
 
         async with aiohttp.ClientSession() as session:
             try:
-                for article in articles:
-                    # Send article title
-                    title_message = f"## {article.get('revised_title', 'No Title')}"
-                    await channel.send(title_message)
+                # Generate a cool header for today's tech news
+                today = datetime.now().strftime("%Y-%m-%d")
+                header = "## TechCrunch Daily Digest #001\n"
+                header_1 = f"📅 Date: {today}\n"
 
-                    # Send article image (if available)
-                    if article.get('image_links'):
-                        image_data = await download_image(session, article['image_links'])
-                        if image_data:
-                            resized_image = resize_image(image_data)
-                            file = discord.File(resized_image, filename="article_image.png")
-                            await channel.send(file=file)
+                await channel.send(header)
+                await channel.send(header_1)
+                
+                for index, article in enumerate(articles, 1):
+                    embed = create_news_embed(article)
+                    await channel.send(embed=embed)
 
-                    # Send article link and summary
-                    link_and_summary = f"<[Read full article]({article.get('link', 'No Link')})>\n"
-                    link_and_summary += f"{article.get('Summary', 'No summary available.')}"
-                    await channel.send(link_and_summary)
-
-                    # Add a separator between articles for clarity
-                    await channel.send("---")
+                    # Add a separator between articles for clarity (optional)
+                    if index < len(articles):
+                        await channel.send("---")
+                
+                # Footer message
+                await channel.send("🔔 Stay tuned for more tech insights tomorrow! 🌐")
             finally:
                 await session.close()
 
