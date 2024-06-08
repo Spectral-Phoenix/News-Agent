@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 co = cohere.Client(os.getenv('COHERE_API_KEY'))
 
 def configure_generative_model():
-
+    """Configures and returns the Google Gemini generative model."""
     genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
     generation_config = {
@@ -39,7 +39,7 @@ def configure_generative_model():
     )
 
 def cohere_summarize(content: str) -> str:
-
+    """Generates a summary of the given content using the Cohere API."""
     response = co.summarize(
         text=content,
         length='medium',
@@ -51,7 +51,7 @@ def cohere_summarize(content: str) -> str:
     return response.summary
 
 def cohere_title(question: str) -> str:
-
+    """Generates a title for the given question using the Cohere API."""
     response = co.generate(
         model='command-r-plus',
         prompt=question,
@@ -63,18 +63,8 @@ def cohere_title(question: str) -> str:
     )
     return response.generations[0].text
 
-def load_json_data(file_path: str) -> dict:
-
-    with open(file_path, 'r', encoding='utf-8') as file:
-        return json.load(file)
-
-def save_json_data(data: dict, file_path: str) -> None:
-
-    with open(file_path, "w", encoding="utf-8") as json_file:
-        json.dump(data, json_file, ensure_ascii=False, indent=2)
-
 def generate_summary(model, article_content: str) -> str:
-
+    """Generates a 3-bullet point summary of the given article content."""
     prompt = (f"""
     {article_content}
     Instructions:
@@ -93,18 +83,12 @@ def generate_summary(model, article_content: str) -> str:
         return answer
         logging.info("Successfully generated summary using fallback model")
 
-def update_json_with_summaries(json_data: dict, model) -> None:
-
-    for article in json_data["articles"]:
-        article["Summary"] = generate_summary(model, article["content"])
-        time.sleep(2)
-
 def clean_title(title: str) -> str:
-
+    """Removes leading '#' and whitespace from a title."""
     return title.lstrip('#').strip()
 
 def generate_revised_title(model, article_title: str, article_content: str) -> str:
-
+    """Generates a revised title for the article."""
     revised_title_prompt = (f"Title:\n{article_title}\nContent:\n{article_content}\n---\n"
                             "Your task is to give a revised title for the above article, do not include any clickbait words "
                             "and represent the actual content of the article\n---\n")
@@ -115,20 +99,18 @@ def generate_revised_title(model, article_title: str, article_content: str) -> s
         logging.error("Error: Title generation failed, Switching to Fallback Model")
         return clean_title(cohere_title(revised_title_prompt))
 
-def update_json_with_titles(json_data: dict, model) -> None:
-
-    for article in json_data["articles"]:
-        article["revised_title"] = generate_revised_title(model, article["title"], article["content"])
-        time.sleep(3)
-
-def summarise(json_file_path: str) -> None:
-
-    json_data = load_json_data(json_file_path)
+def generate_summaries_and_titles(articles_data: dict) -> dict:
+    """Generates summaries and revised titles for articles in the given data."""
     model = configure_generative_model()
-    update_json_with_summaries(json_data, model)
-    update_json_with_titles(json_data, model)
-    save_json_data(json_data, json_file_path)
+    for article in articles_data["articles"]:
+        article["Summary"] = generate_summary(model, article["content"])
+        article["revised_title"] = generate_revised_title(model, article["title"], article["content"])
+        time.sleep(3) 
+    return articles_data
 
+# Example Usage (Commented out)
 # if __name__ == "__main__":
-#     json_file_path = "data/techcrunch_articles_2024-06-06.json"
-#     summarise(json_file_path)
+#     with open("data/techcrunch_articles_2024-06-06.json", 'r', encoding='utf-8') as file:
+#         json_data = json.load(file)
+#     updated_data = generate_summaries_and_titles(json_data)
+#     print(updated_data)

@@ -12,15 +12,7 @@ from bs4 import BeautifulSoup
 logging.basicConfig(level=logging.INFO)
 
 def extract_date(link):
-    """
-    Extract the date from a URL.
-
-    Parameters:
-        link (str): URL string.
-        
-    Returns:
-        datetime.date or None: Extracted date or None if not found.
-    """
+    """Extracts the date from a URL."""
     match = re.search(r"/(\d{4}/\d{2}/\d{2})/", link)
     if match:
         date_str = match.group(1)
@@ -29,16 +21,7 @@ def extract_date(link):
         return None
 
 def scrape_links(category_url, category):
-    """
-    Scrape links from a specified category URL.
-
-    Parameters:
-        category_url (str): URL of the category.
-        category (str): Category name.
-
-    Returns:
-        list: List of tuples containing (link, category).
-    """
+    """Scrapes links from a specified category URL."""
     try:
         resp = requests.get(category_url)
         resp.raise_for_status()
@@ -49,15 +32,7 @@ def scrape_links(category_url, category):
         return []
 
 def parse_article(link):
-    """
-    Parse article content from a specified article URL using newspaper3k.
-
-    Parameters:
-        link (str): URL of the article.
-
-    Returns:
-        dict or None: Parsed article data or None if parsing fails.
-    """
+    """Parses article content from a URL using newspaper3k."""
     try:
         article = newspaper.Article(link)
         article.download()
@@ -83,18 +58,11 @@ def parse_article(link):
         return None
 
 def scrape_articles(date_input):
-    """
-    Scrape articles from TechCrunch based on a specified date.
-
-    Parameters:
-        date_input (str): Target date in the format 'YYYY-MM-DD'.
-
-    Returns:
-        str or None: Filename of the saved JSON data or None if errors occur during the process.
-    """
+    """Scrapes articles from TechCrunch for a specific date."""
     if not date_input:
         logging.error("Please provide a valid date.")
         return
+
     try:
         target_date = datetime.strptime(date_input, "%Y-%m-%d").date()
     except ValueError:
@@ -111,7 +79,7 @@ def scrape_articles(date_input):
     logging.info("Fetching articles...")
 
     start_time = time.time()
-    links = set()  # Set to store unique links
+    links = set() 
 
     for category in CATEGORIES:
         category_url = BASE_URL + category + "/"
@@ -133,7 +101,6 @@ def scrape_articles(date_input):
     elapsed_time = end_time - start_time
     elapsed_time_in_seconds = int(elapsed_time)
 
-    # Save the data to a JSON file
     data = {
         "source": "TechCrunch",
         "date": str(target_date),
@@ -141,20 +108,12 @@ def scrape_articles(date_input):
         "articles": articles
     }
 
-    filename = f"data/{target_date}_techcrunch.json"
+    logging.info(f"{len(articles)} articles scraped successfully!")
+    logging.info(f"Elapsed time: {elapsed_time_in_seconds} seconds")
+    return data
 
-    try:
-        with open(filename, 'w', encoding='utf-8') as json_file:
-            json.dump(data, json_file, ensure_ascii=False, indent=4)
-
-        logging.info(f"{len(articles)} articles scraped successfully and saved to {filename}!")
-        logging.info(f"Elapsed time: {elapsed_time_in_seconds} seconds")
-        return filename
-
-    except (IOError, OSError) as file_error:
-        logging.error(f"Error writing data to JSON file: {file_error}")
-        return None
-
+# Example Usage (Commented out)
 # if __name__ == "__main__":
-#     date_input = input("Enter the date (YYYY-MM-DD): ")
-#     scrape_articles(date_input)
+#    date_input = input("Enter the date (YYYY-MM-DD): ")
+#    data = scrape_articles(date_input)
+#    print(data)

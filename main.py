@@ -1,30 +1,24 @@
 import datetime
-import os
-
-from src.generate import summarise
-from src.rank import rank
 from src.scrape import scrape_articles
-from src.supa_base import upload
-from app import send_technews
+from src.generate import generate_summaries_and_titles
+from src.rank import rank_articles
+from src.supa_base import upload_json
+from app import start_discord_bot
 
 def main():
+    """Main function to orchestrate the entire process."""
     
-    today = datetime.date.today()
-    yesterday = today - datetime.timedelta(days=1)
-    date_str = yesterday.strftime("%Y-%m-%d")
-    
-    filename = scrape_articles(date_str)
-    ranked_filename = f"{date_str}_technews.json"
-    summarise(filename)
-    rank(yesterday)
-    upload("tech-news", filename, filename)
-    upload("tech-news", ranked_filename, ranked_filename)
-    send_technews()
+    yesterday = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
 
-    if os.path.exists(ranked_filename):
-        os.remove(ranked_filename)
-    else:
-        print(f"The file {ranked_filename} does not exist")
+    scraped_data = scrape_articles(yesterday)
+    if scraped_data:
+        articles_with_summaries = generate_summaries_and_titles(scraped_data.copy())
+        ranked_articles = rank_articles(articles_with_summaries.copy())
+        
+        if ranked_articles:
+            upload_json("tech-news", f"data/{yesterday}_techcrunch.json", scraped_data)
+            upload_json("tech-news", f"{yesterday}_technews.json", ranked_articles)
+            start_discord_bot(ranked_articles['articles'])
 
 if __name__ == "__main__":
     main()

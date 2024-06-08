@@ -4,6 +4,7 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 
 def load_configurations():
+    """Loads environment variables and configures the Google Gemini model."""
     load_dotenv()
     api_key = os.getenv("GEMINI_API_KEY")
     genai.configure(api_key=api_key)
@@ -55,17 +56,19 @@ def load_configurations():
     )
     return model
 
-def load_prompt(file_path):
-    with open(file_path, 'r') as file:
-        return file.read()
+def load_data(data):
+    """Loads articles data from the provided dictionary."""
+    return json.dumps(data)
 
 def extract_json_content(response_text):
+    """Extracts JSON content from the response text."""
     if "```json" in response_text:
         lines = response_text.splitlines()
         return '\n'.join(lines[1:-1])
     return None
 
 def find_matching_articles(parsed_json, articles_with_content):
+    """Finds and returns matching articles based on their links."""
     matching_articles = []
     for article in parsed_json:
         article_link = article['article_link']
@@ -80,33 +83,29 @@ def find_matching_articles(parsed_json, articles_with_content):
                 })
     return matching_articles
 
-def rank(date):
+def rank_articles(articles_data):
+    """Ranks the provided articles using the configured model."""
     load_configurations()
     model = load_configurations()
-    prompt = load_prompt('data/2024-06-07_techcrunch.json')
+    prompt = load_data(articles_data)
     response_text = model.generate_content(prompt).text
     json_content = extract_json_content(response_text)
 
     if json_content:
         try:
             parsed_json = json.loads(json_content)
-            with open(f'data/{date}_techcrunch.json', 'r') as file:
-                articles_with_content = json.load(file)
-            matching_articles = find_matching_articles(parsed_json, articles_with_content)
+            matching_articles = find_matching_articles(parsed_json, articles_data)
 
             output_data = {
                 "source": "TechCrunch",
-                "date": articles_with_content['date'],
+                "date": articles_data['date'],
                 "no_of_articles": len(matching_articles),
                 "articles": matching_articles
             }
-
-            with open('extracted_articles.json', 'w') as file:
-                json.dump(output_data, file, indent=4)
-            print("Matching articles saved to extracted_articles.json")
+            return output_data
         except json.JSONDecodeError as e:
             print(f"Error decoding JSON: {e}")
+            return None
     else:
         print("No JSON content found in the response.")
-
-# rank("2024-06-07")
+        return None
