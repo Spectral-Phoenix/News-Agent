@@ -1,10 +1,11 @@
 import datetime
-from src.scrape import scrape_articles
+import logging
+
+from app import start_discord_bot
 from src.generate import generate_summaries_and_titles
 from src.rank import rank_articles
+from src.scrape import scrape_articles
 from src.supa_base import upload_json
-from app import start_discord_bot
-import logging
 
 logging.basicConfig(level=logging.INFO)
 
