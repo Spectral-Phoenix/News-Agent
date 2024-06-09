@@ -63,10 +63,8 @@ def create_news_embed(article):
 
         if article.get('image_links'):
             embed.set_thumbnail(url=article['image_links'])
-
-        embed.add_field(name="Read Full Article", value=f"[Click here]({article.get('link', 'https://techcrunch.com')})", inline=True)
-        embed.add_field(name="Source", value="TechCrunch", inline=True)
-        embed.set_footer(text="Powered by MassCoders | News Agent")
+            
+        embed.set_footer(text="Powered by MassCoders | News Agent \t\t\t\t\t TechCrunch")
 
         return embed
     except Exception as e:

@@ -37,6 +37,10 @@ def parse_article(link):
         article.download()
         article.parse()
 
+        if "TechCrunch Week in Review" in article.title:
+            logging.info(f"Skipping article with title: {article.title}")
+            return None
+            
         if article.title and article.text:
             return {
                 "title": article.title,

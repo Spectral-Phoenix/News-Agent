@@ -49,6 +49,7 @@ def load_configurations():
                 "Timeliness: Articles should be from the last 24-48 hours to ensure freshness of news.\n"
                 "Instructions for the LLM:\n"
                 "Rapidly assess each article's content for breaking news value.\n"
+                "Strictly avoid product reviews, Weekly reviews and other unencessary articles\n"
                 "Assign a 'newsworthiness score' (1-10) based on the above rules, with higher scores for fresher, more impactful news.\n"
                 "Sort articles in descending order of their newsworthiness scores.\n"
                 "Return the top 5 articles in the specified JSON format.\n"
