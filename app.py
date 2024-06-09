@@ -26,39 +26,51 @@ client = discord.Client(intents=intents)
 
 async def download_image(session, url):
     """Downloads an image from the given URL."""
-    async with session.get(url) as response:
-        if response.status == 200:
-            return await response.read()
-        else:
-            logging.warning(f"Failed to download image from {url}. Status: {response.status}")
-            return None
+    try:
+        async with session.get(url) as response:
+            if response.status == 200:
+                return await response.read()
+            else:
+                logging.warning(f"Failed to download image from {url}. Status: {response.status}")
+                return None
+    except aiohttp.ClientError as e:
+        logging.error(f"Error downloading image from {url}: {e}")
+        return None
 
 def resize_image(image_data):
     """Resizes an image to the specified dimensions."""
-    image = Image.open(io.BytesIO(image_data))
-    image.thumbnail((MAX_WIDTH, MAX_HEIGHT))
-    buffered = io.BytesIO()
-    image.save(buffered, format="PNG")
-    buffered.seek(0)
-    return buffered
+    try:
+        image = Image.open(io.BytesIO(image_data))
+        image.thumbnail((MAX_WIDTH, MAX_HEIGHT))
+        buffered = io.BytesIO()
+        image.save(buffered, format="PNG")
+        buffered.seek(0)
+        return buffered
+    except Exception as e:
+        logging.error(f"Error resizing image: {e}")
+        return None
 
 def create_news_embed(article):
     """Creates a Discord embed for a news article."""
-    embed = discord.Embed(
-        title=article.get('revised_title', 'No Title'),
-        description=article.get('Summary', 'No summary available.'),
-        color=0x00AAFF,  
-        url=article.get('link', 'https://techcrunch.com')
-    )
+    try:
+        embed = discord.Embed(
+            title=article.get('revised_title', 'No Title'),
+            description=article.get('Summary', 'No summary available.'),
+            color=0x00AAFF,  
+            url=article.get('link', 'https://techcrunch.com')
+        )
 
-    if article.get('image_links'):
-        embed.set_thumbnail(url=article['image_links'])
+        if article.get('image_links'):
+            embed.set_thumbnail(url=article['image_links'])
 
-    embed.add_field(name="Read Full Article", value=f"[Click here]({article.get('link', 'https://techcrunch.com')})", inline=True)
-    embed.add_field(name="Source", value="TechCrunch", inline=True)
-    embed.set_footer(text="Powered by MassCoders | News Agent")
+        embed.add_field(name="Read Full Article", value=f"[Click here]({article.get('link', 'https://techcrunch.com')})", inline=True)
+        embed.add_field(name="Source", value="TechCrunch", inline=True)
+        embed.set_footer(text="Powered by MassCoders | News Agent")
 
-    return embed
+        return embed
+    except Exception as e:
+        logging.error(f"Error creating news embed: {e}")
+        return None
 
 async def send_technews(articles):
     """Sends tech news to the Discord channel."""
@@ -66,21 +78,28 @@ async def send_technews(articles):
     if not channel:
         logging.error(f"Channel with ID {CHANNEL_ID} not found.")
         return
+
     async with aiohttp.ClientSession() as session:
         try:
             today = datetime.now().strftime("%Y-%m-%d")
-            header = "## TechCrunch Daily Digest #001\n"
-            header_1 = f"📅 Date: {today}\n"
+            header = f"## NewsAgent Daily Digest - {today}\n"
             await channel.send(header)
-            await channel.send(header_1)
+
             for index, article in enumerate(articles, 1):
                 embed = create_news_embed(article)
-                await channel.send(embed=embed)
+                if embed:
+                    await channel.send(embed=embed)
+                else:
+                    logging.warning(f"Skipping article due to error creating embed: {article}")
                 if index < len(articles):
                     await channel.send("---")
-            await channel.send("🔔 Stay tuned for more tech insights tomorrow! 🌐")
+
+            # await channel.send("🔔 Stay tuned for more tech insights tomorrow! 🌐")
+
+        except Exception as e:
+            logging.error(f"An error occurred while sending tech news: {e}")
         finally:
-            await session.close()
+            await client.close()
 
 def start_discord_bot(articles):
     @client.event
@@ -88,6 +107,7 @@ def start_discord_bot(articles):
         logging.info(f"{client.user.name} has connected to Discord!")
         await send_technews(articles)
 
-
-    client.run(DISCORD_TOKEN)
-
+    try:
+        client.run(DISCORD_TOKEN)
+    except discord.LoginFailure as e:
+        logging.critical(f"Failed to log in to Discord: {e}")

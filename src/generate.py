@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import time
@@ -18,7 +17,11 @@ co = cohere.Client(os.getenv('COHERE_API_KEY'))
 
 def configure_generative_model():
     """Configures and returns the Google Gemini generative model."""
-    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+    try:
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+    except Exception as e:
+        logging.error(f"Error configuring Gemini: {e}")
+        raise  # Re-raise the exception to halt execution
 
     generation_config = {
         "temperature": 0.9,
@@ -40,28 +43,36 @@ def configure_generative_model():
 
 def cohere_summarize(content: str) -> str:
     """Generates a summary of the given content using the Cohere API."""
-    response = co.summarize(
-        text=content,
-        length='medium',
-        format='bullets',
-        model='command-r-plus',
-        additional_command='',
-        temperature=0.3,
-    ) 
-    return response.summary
+    try:
+        response = co.summarize(
+            text=content,
+            length='medium',
+            format='bullets',
+            model='command-r-plus',
+            additional_command='',
+            temperature=0.3,
+        )
+        return response.summary
+    except Exception as e:
+        logging.error(f"Error generating summary with Cohere: {e}")
+        return "Error: Unable to generate summary."
 
 def cohere_title(question: str) -> str:
     """Generates a title for the given question using the Cohere API."""
-    response = co.generate(
-        model='command-r-plus',
-        prompt=question,
-        max_tokens=300,
-        temperature=0.9,
-        k=0,
-        stop_sequences=[],
-        return_likelihoods='NONE'
-    )
-    return response.generations[0].text
+    try:
+        response = co.generate(
+            model='command-r-plus',
+            prompt=question,
+            max_tokens=300,
+            temperature=0.9,
+            k=0,
+            stop_sequences=[],
+            return_likelihoods='NONE'
+        )
+        return response.generations[0].text
+    except Exception as e:
+        logging.error(f"Error generating title with Cohere: {e}")
+        return "Error: Unable to generate title."
 
 def generate_summary(model, article_content: str) -> str:
     """Generates a 3-bullet point summary of the given article content."""
@@ -76,12 +87,15 @@ def generate_summary(model, article_content: str) -> str:
     try:
         answer = model.generate_content(prompt)
         return answer.text.strip().replace("\n\n", "\n")
-        
-    except Exception:
-        logging.error("Error: Summary generation failed, Switching to Fallback Model")
-        answer = cohere_summarize(article_content)
-        return answer
-        logging.info("Successfully generated summary using fallback model")
+    except Exception as e:
+        logging.error(f"Error generating summary with Gemini: {e}. Switching to fallback model.")
+        try:
+            answer = cohere_summarize(article_content)
+            logging.info("Successfully generated summary using fallback model.")
+            return answer
+        except Exception as e:
+            logging.error(f"Error generating summary with fallback model (Cohere): {e}")
+            return "Error: Unable to generate summary."
 
 def clean_title(title: str) -> str:
     """Removes leading '#' and whitespace from a title."""
@@ -89,19 +103,35 @@ def clean_title(title: str) -> str:
 
 def generate_revised_title(model, article_title: str, article_content: str) -> str:
     """Generates a revised title for the article."""
-    revised_title_prompt = (f"Title:\n{article_title}\nContent:\n{article_content}\n---\n"
-                            "Your task is to give a revised title for the above article, do not include any clickbait words "
-                            "and represent the actual content of the article\n---\n")
+    revised_title_prompt = (f"""
+    Title:{article_title}
+    Content:{article_content}
+    Your task is to give a revised title for the above article, do not include any clickbait words
+    and represent the actual content of the article
+    Just return a single revised title, donot include any explanation or markdown formatting.
+    """)
+
     try:
         response = model.generate_content(revised_title_prompt)
         return clean_title(response.text.strip())
-    except Exception:
-        logging.error("Error: Title generation failed, Switching to Fallback Model")
-        return clean_title(cohere_title(revised_title_prompt))
+    except Exception as e:
+        logging.error(f"Error generating revised title with Gemini: {e}. Switching to fallback model.")
+        try:
+            revised_title = clean_title(cohere_title(revised_title_prompt))
+            logging.info("Successfully generated revised title using fallback model.")
+            return revised_title
+        except Exception as e:
+            logging.error(f"Error generating revised title with fallback model (Cohere): {e}")
+            return "Error: Unable to generate revised title."
 
 def generate_summaries_and_titles(articles_data: dict) -> dict:
     """Generates summaries and revised titles for articles in the given data."""
-    model = configure_generative_model()
+    try:
+        model = configure_generative_model()
+    except Exception as e:
+        logging.error(f"Error configuring generative model: {e}")
+        return articles_data  # Return original data if model configuration fails
+
     for article in articles_data["articles"]:
         article["Summary"] = generate_summary(model, article["content"])
         article["revised_title"] = generate_revised_title(model, article["title"], article["content"])
