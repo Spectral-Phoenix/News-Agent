@@ -2,19 +2,22 @@ import streamlit as st
 import json
 
 def main():
-    st.title("TechCrunch Article Selector")
+
+    st.text("")
 
     # Load the JSON data
     with open("2024-06-10_techcrunch.json", "r") as f:
         data = json.load(f)
 
-    # Display articles with checkboxes
+    # Display articles with checkboxes, using unique keys
     selected_articles = []
-    for article in data["articles"]:
-        with st.expander(article["title"]):
-            st.write(article["content"])
-            if st.checkbox("Select this article"):
-                selected_articles.append(article)
+    for i, article in enumerate(data["articles"]):
+        st.markdown(f"### {article['revised_title']}")
+        st.write(article["Summary"])
+        key = f"checkbox_{i}"  # Create a unique key for each checkbox
+        if st.checkbox("Select this article", key=key):
+            selected_articles.append(article)
+        st.divider()
 
     # Save selected articles to a new JSON file
     if st.button("Save Selected Articles"):
