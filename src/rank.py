@@ -26,7 +26,7 @@ def load_configurations():
         }
 
         model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
+            model_name="gemini-1.5-pro",
             generation_config=generation_config,
             safety_settings=[
                 {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
@@ -46,13 +46,13 @@ def load_configurations():
                 "Global Impact: Favor news that has wide-reaching effects on the global tech landscape, not just niche or local stories.\n"
                 "Fundraising Selectivity: Include fundraising news only for exceptionally large rounds (e.g., over $100 million) or for highly influential companies (e.g., OpenAI, SpaceX).\n"
                 "Authoritative Sources: Prioritize articles quoting or sourced from industry leaders, respected tech journalists, or official company announcements.\n"
-                "Timeliness: Articles should be from the last 24-48 hours to ensure freshness of news.\n"
                 "Instructions for the LLM:\n"
                 "Rapidly assess each article's content for breaking news value.\n"
                 "Strictly avoid product reviews, Weekly reviews and other unencessary articles\n"
                 "Assign a 'newsworthiness score' (1-10) based on the above rules, with higher scores for fresher, more impactful news.\n"
                 "Sort articles in descending order of their newsworthiness scores.\n"
-                "Return the top 5 articles in the specified JSON format.\n"
+                " Only Return the articles which are important. be careful, you should never send an unecessary article, if you do so the trust on the news service will be reduced, so be extremely careful!!\
+                    if there are no important articles, just return nothing.\n"
                 "JSON Format:\n"
                 "[\n"
                 "    {\n"
